@@ -1,0 +1,5 @@
+**/bin/
+**/obj/
+**/client_secret.apps.googleusercontent.com.json
+**/appsettings.Development.json
+**/token.json/

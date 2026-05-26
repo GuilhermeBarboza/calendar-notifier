@@ -1,0 +1,15 @@
+# Build
+**/bin/
+**/obj/
+
+# IDE
+.idea/
+.vs/
+*.DotSettings.user
+
+# Configurações locais
+**/appsettings.Development.json
+
+# Google OAuth
+**/client_secret*.json
+**/token.json/

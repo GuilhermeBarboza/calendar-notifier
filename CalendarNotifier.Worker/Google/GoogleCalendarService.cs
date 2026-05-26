@@ -25,5 +25,6 @@ public class GoogleCalendarService
         
         var events = await request.ExecuteAsync();
         return events.Items;
+        
     }
 }

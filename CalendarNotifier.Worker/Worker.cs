@@ -1,3 +1,4 @@
+using CalendarNotifier.Worker.Configurations;
 using CalendarNotifier.Worker.Formatting;
 using CalendarNotifier.Worker.Google;
 
@@ -8,6 +9,23 @@ public class Worker(ILogger<Worker> logger) : BackgroundService
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var calendar = new GoogleCalendarService();
+
+        try
+        {
+            using var connection = await RabbitMqConnection.CreateAsync();
+            using var channel = await connection.CreateChannelAsync();
+
+            await channel.QueueDeclareAsync(
+                queue: "calendar-events",
+                durable: false,
+                exclusive: false,
+                autoDelete: false,
+                arguments: null);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erro: {ex.Message}");
+        }
 
         while (!stoppingToken.IsCancellationRequested)
         {

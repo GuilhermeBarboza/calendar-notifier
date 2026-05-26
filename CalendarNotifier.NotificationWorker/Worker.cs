@@ -1,11 +1,15 @@
+using CalendarNotifier.NotificationWorker.Configurations;
+using Microsoft.Extensions.Options;
+
 namespace CalendarNotifier.NotificationWorker;
-public class Worker : BackgroundService
+public class Worker(IOptions<TelegramSettings> options) : BackgroundService
 {
+    private readonly TelegramSettings _settings = options.Value;
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var telegram = new TelegramService("8700195733:AAH0zjZUSRDyUPG8hQiM5lXgzE2qUgAyS3Q");
-
-        long chatId = -5151219139;
+        var telegram = new TelegramService(_settings.BotToken);
+        long chatId = _settings.ChatId;
 
         while (!stoppingToken.IsCancellationRequested)
         {

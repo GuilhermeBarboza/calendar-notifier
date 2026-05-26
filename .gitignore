@@ -9,6 +9,7 @@
 
 # Configurações locais
 **/appsettings.Development.json
+**/appsettings.json
 
 # Google OAuth
 **/client_secret*.json

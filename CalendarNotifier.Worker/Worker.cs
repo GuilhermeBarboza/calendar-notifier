@@ -1,6 +1,8 @@
+using System.Text;
 using CalendarNotifier.Worker.Configurations;
 using CalendarNotifier.Worker.Formatting;
 using CalendarNotifier.Worker.Google;
+using RabbitMQ.Client;
 
 namespace CalendarNotifier.Worker;
 
@@ -9,18 +11,18 @@ public class Worker(ILogger<Worker> logger) : BackgroundService
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var calendar = new GoogleCalendarService();
+        await using var connection = await RabbitMqConnection.CreateAsync();
+        await using var channel = await connection.CreateChannelAsync(cancellationToken: stoppingToken);
 
         try
         {
-            using var connection = await RabbitMqConnection.CreateAsync();
-            using var channel = await connection.CreateChannelAsync();
-
             await channel.QueueDeclareAsync(
                 queue: "calendar-events",
                 durable: false,
                 exclusive: false,
                 autoDelete: false,
-                arguments: null);
+                arguments: null,
+                cancellationToken: stoppingToken);
         }
         catch (Exception ex)
         {
@@ -35,22 +37,17 @@ public class Worker(ILogger<Worker> logger) : BackgroundService
 
                 var events = await calendar.GetNext30DaysEvents();
                 var message = MessageFormatter.Format(events);
-                
-                var sharedPath = Path.Combine(
-                    Directory.GetCurrentDirectory(),
-                    "..",
-                    "shared");
+                var body = Encoding.UTF8.GetBytes(message);
 
-                sharedPath = Path.GetFullPath(sharedPath);
-                Directory.CreateDirectory(sharedPath);
-
-                var fileName = Path.Combine(
-                    sharedPath,
-                    $"message-{DateTime.Now:yyyyMMddHHmmss}.txt");
+                await channel.BasicPublishAsync<BasicProperties>(
+                    exchange: "",
+                    routingKey: "calendar-events",
+                    mandatory: false,
+                    basicProperties: new BasicProperties(),
+                    body: body,
+                    cancellationToken: stoppingToken);
                 
-                await File.WriteAllTextAsync(fileName, message);
-                
-                Console.WriteLine($"Arquivo gerado: {fileName}");
+                Console.WriteLine("Mensagem publicada na fila.");
             }
             catch (Exception ex)
             {

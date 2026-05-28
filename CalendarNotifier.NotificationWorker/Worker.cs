@@ -43,6 +43,11 @@ public class Worker(IOptions<TelegramSettings> options) : BackgroundService
                 await telegram.SendMessage(_settings.ChatId, message);
                 
                 Console.WriteLine("Mensagem enviada ao Telegram.");
+                
+                await channel.BasicAckAsync(
+                    deliveryTag: ea.DeliveryTag,
+                    multiple: false,
+                    cancellationToken: stoppingToken);
             }
             catch (Exception ex)
             {
@@ -52,7 +57,7 @@ public class Worker(IOptions<TelegramSettings> options) : BackgroundService
 
         await channel.BasicConsumeAsync(
             queue: "calendar-events",
-            autoAck: true,
+            autoAck: false,
             consumer: consumer,
             cancellationToken: stoppingToken);
         

@@ -39,6 +39,7 @@ public class Worker(ILogger<Worker> logger) : BackgroundService
                 var message = MessageFormatter.Format(events);
                 var body = Encoding.UTF8.GetBytes(message);
 
+                
                 await channel.BasicPublishAsync<BasicProperties>(
                     exchange: "",
                     routingKey: "calendar-events",

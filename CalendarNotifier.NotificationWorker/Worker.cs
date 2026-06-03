@@ -48,7 +48,7 @@ public class Worker(IOptions<TelegramSettings> options) : BackgroundService
             
             await channel.QueueDeclareAsync(
                 queue: "calendar-events",
-                durable: false,
+                durable: true,
                 exclusive: false,
                 autoDelete: false,
                 arguments: arguments,

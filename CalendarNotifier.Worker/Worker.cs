@@ -46,7 +46,7 @@ public class Worker(ILogger<Worker> logger) : BackgroundService
             
             await channel.QueueDeclareAsync(
                 queue: "calendar-events",
-                durable: false,
+                durable: true,
                 exclusive: false,
                 autoDelete: false,
                 arguments: arguments,

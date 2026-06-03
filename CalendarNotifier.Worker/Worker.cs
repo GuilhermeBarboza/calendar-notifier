@@ -17,11 +17,24 @@ public class Worker(ILogger<Worker> logger) : BackgroundService
         try
         {
             await channel.QueueDeclareAsync(
+                queue: "calendar-events-dlq",
+                durable: true,
+                exclusive: false,
+                autoDelete: false,
+                cancellationToken: stoppingToken);
+            
+            var arguments = new Dictionary<string, object?>
+            {
+                { "x-dead-letter-exchange", "" },
+                { "x-dead-letter-routing-key", "calendar-events-dlq" }
+            };
+            
+            await channel.QueueDeclareAsync(
                 queue: "calendar-events",
                 durable: false,
                 exclusive: false,
                 autoDelete: false,
-                arguments: null,
+                arguments: arguments,
                 cancellationToken: stoppingToken);
         }
         catch (Exception ex)

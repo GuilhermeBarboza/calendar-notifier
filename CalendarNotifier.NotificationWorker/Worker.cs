@@ -18,11 +18,24 @@ public class Worker(IOptions<TelegramSettings> options) : BackgroundService
         try
         {
             await channel.QueueDeclareAsync(
+                queue: "calendar-events-dlq",
+                durable: true,
+                exclusive: false,
+                autoDelete: false,
+                cancellationToken: stoppingToken);
+            
+            var arguments = new Dictionary<string, object?>
+            {
+                { "x-dead-letter-exchange", "" },
+                { "x-dead-letter-routing-key", "calendar-events-dlq" }
+            };
+            
+            await channel.QueueDeclareAsync(
                 queue: "calendar-events",
                 durable: false,
                 exclusive: false,
                 autoDelete: false,
-                arguments: null,
+                arguments: arguments,
                 cancellationToken: stoppingToken);
         }
         catch (Exception ex)
@@ -31,28 +44,56 @@ public class Worker(IOptions<TelegramSettings> options) : BackgroundService
         }
         
         var consumer = new AsyncEventingBasicConsumer(channel);
+        
+        var maxRetries = 3;
+        
         consumer.ReceivedAsync += async (model, ea) =>
         {
-            try
+            var processed = false;
+            var retryCount = 0;
+
+            while (!processed && retryCount < maxRetries)
             {
-                var body = ea.Body.ToArray();
-                var message = Encoding.UTF8.GetString(body);
+                try
+                {
+                    var body = ea.Body.ToArray();
+                    var message = Encoding.UTF8.GetString(body);
                 
-                Console.WriteLine("Mensagem recebida da fila.");
+                    Console.WriteLine(
+                        $"Tentativa {retryCount + 1}");
                 
-                await telegram.SendMessage(_settings.ChatId, message);
+                    await telegram.SendMessage(_settings.ChatId, message);
                 
-                Console.WriteLine("Mensagem enviada ao Telegram.");
+                    Console.WriteLine("Mensagem enviada ao Telegram.");
                 
-                await channel.BasicAckAsync(
-                    deliveryTag: ea.DeliveryTag,
-                    multiple: false,
-                    cancellationToken: stoppingToken);
+                    // SIMULA FALHA
+                    // throw new Exception("Falha proposital");
+                
+                    await channel.BasicAckAsync(
+                        deliveryTag: ea.DeliveryTag,
+                        multiple: false,
+                        cancellationToken: stoppingToken);
+                    
+                    Console.WriteLine("Mensagem processada.");
+                    
+                    processed = true;
+                }
+                catch (Exception ex)
+                {
+                    retryCount++;
+                    
+                    Console.WriteLine(
+                        "Mensagem enviada para DLQ.");
+                    
+                    await channel.BasicNackAsync(
+                        deliveryTag: ea.DeliveryTag,
+                        multiple: false,
+                        requeue: false,
+                        cancellationToken: stoppingToken);
+                }
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Erro: {ex.Message}");
-            }
+            
+            
         };
 
         await channel.BasicConsumeAsync(

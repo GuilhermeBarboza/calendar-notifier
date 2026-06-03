@@ -16,6 +16,21 @@ public class Worker(ILogger<Worker> logger) : BackgroundService
 
         try
         {
+            var retryArgs = new Dictionary<string, object?>
+            {
+                {"x-message-ttl", 1500},
+                {"x-dead-letter-exchange", ""},
+                {"x-dead-letter-routing-key", "calendar-events"},
+            };
+
+            await channel.QueueDeclareAsync(
+                queue: "calendar-events-retry",
+                durable: true,
+                exclusive: false,
+                autoDelete: false,
+                arguments: retryArgs,
+                cancellationToken: stoppingToken);
+            
             await channel.QueueDeclareAsync(
                 queue: "calendar-events-dlq",
                 durable: true,
@@ -26,7 +41,7 @@ public class Worker(ILogger<Worker> logger) : BackgroundService
             var arguments = new Dictionary<string, object?>
             {
                 { "x-dead-letter-exchange", "" },
-                { "x-dead-letter-routing-key", "calendar-events-dlq" }
+                { "x-dead-letter-routing-key", "calendar-events-retry" }
             };
             
             await channel.QueueDeclareAsync(

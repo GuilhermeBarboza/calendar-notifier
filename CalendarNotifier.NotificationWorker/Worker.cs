@@ -1,5 +1,6 @@
 using System.Text;
 using CalendarNotifier.NotificationWorker.Configurations;
+using CalendarNotifier.NotificationWorker.Messaging;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;

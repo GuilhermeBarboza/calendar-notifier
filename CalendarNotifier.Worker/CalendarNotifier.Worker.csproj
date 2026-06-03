@@ -16,6 +16,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Messaging\" />
+    <Folder Include="Configurations\" />
   </ItemGroup>
 </Project>

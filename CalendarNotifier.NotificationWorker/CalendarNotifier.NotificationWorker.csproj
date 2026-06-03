@@ -15,4 +15,8 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CalendarNotifier.Messaging\CalendarNotifier.Messaging.csproj" />
+  </ItemGroup>
 </Project>

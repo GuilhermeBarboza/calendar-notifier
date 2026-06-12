@@ -1,5 +1,5 @@
 using System.Text;
-using CalendarNotifier.Messaging;
+using CalendarNotifier.Messaging.RabbitMq;
 using CalendarNotifier.Worker.Formatting;
 using CalendarNotifier.Worker.Google;
 using RabbitMQ.Client;

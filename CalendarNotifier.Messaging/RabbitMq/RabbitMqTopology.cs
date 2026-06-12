@@ -1,6 +1,6 @@
 using RabbitMQ.Client;
 
-namespace CalendarNotifier.Messaging;
+namespace CalendarNotifier.Messaging.RabbitMq;
 
 public static class RabbitMqTopology
 {

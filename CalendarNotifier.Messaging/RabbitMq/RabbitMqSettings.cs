@@ -1,4 +1,4 @@
-namespace CalendarNotifier.Messaging;
+namespace CalendarNotifier.Messaging.RabbitMq;
 
 public class RabbitMqSettings
 {

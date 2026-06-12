@@ -8,9 +8,9 @@ public static class RabbitMqConnection
     {
         var factory = new ConnectionFactory()
         {
-            HostName = "localhost",
-            UserName = "guest",
-            Password = "guest",
+            HostName = RabbitMqSettings.Host,
+            UserName = RabbitMqSettings.Username,
+            Password = RabbitMqSettings.Password,
         };
 
         return await factory.CreateConnectionAsync();

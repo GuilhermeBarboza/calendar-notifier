@@ -10,7 +10,7 @@ public static class RabbitMqTopology
     {
         var retryArgs = new Dictionary<string, object?>
         {
-            { "x-message-ttl", 1500 },
+            { "x-message-ttl", RabbitMqSettings.RetryDelayMilliseconds },
             { "x-dead-letter-exchange", "" },
             { "x-dead-letter-routing-key", QueueNames.CALENDAR_EVENTS }
         };

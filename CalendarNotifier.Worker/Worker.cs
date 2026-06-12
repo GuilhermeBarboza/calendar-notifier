@@ -1,5 +1,5 @@
 using System.Text;
-using CalendarNotifier.Worker.Messaging;
+using CalendarNotifier.Messaging;
 using CalendarNotifier.Worker.Formatting;
 using CalendarNotifier.Worker.Google;
 using RabbitMQ.Client;
@@ -11,51 +11,13 @@ public class Worker(ILogger<Worker> logger) : BackgroundService
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var calendar = new GoogleCalendarService();
-        await using var connection = await RabbitMqConnection.CreateAsync();
-        await using var channel = await connection.CreateChannelAsync(cancellationToken: stoppingToken);
-
-        try
-        {
-            var retryArgs = new Dictionary<string, object?>
-            {
-                {"x-message-ttl", 1500},
-                {"x-dead-letter-exchange", ""},
-                {"x-dead-letter-routing-key", "calendar-events"},
-            };
-
-            await channel.QueueDeclareAsync(
-                queue: "calendar-events-retry",
-                durable: true,
-                exclusive: false,
-                autoDelete: false,
-                arguments: retryArgs,
-                cancellationToken: stoppingToken);
-            
-            await channel.QueueDeclareAsync(
-                queue: "calendar-events-dlq",
-                durable: true,
-                exclusive: false,
-                autoDelete: false,
-                cancellationToken: stoppingToken);
-            
-            var arguments = new Dictionary<string, object?>
-            {
-                { "x-dead-letter-exchange", "" },
-                { "x-dead-letter-routing-key", "calendar-events-retry" }
-            };
-            
-            await channel.QueueDeclareAsync(
-                queue: "calendar-events",
-                durable: true,
-                exclusive: false,
-                autoDelete: false,
-                arguments: arguments,
-                cancellationToken: stoppingToken);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Erro: {ex.Message}");
-        }
+        await using var connection = 
+            await RabbitMqConnection.CreateAsync();
+        
+        await using var channel = 
+            await  connection.CreateChannelAsync(cancellationToken: stoppingToken);
+        
+        await RabbitMqTopology.DeclareAsync(channel, stoppingToken);
 
         while (!stoppingToken.IsCancellationRequested)
         {

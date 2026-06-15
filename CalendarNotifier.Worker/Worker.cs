@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json;
 using CalendarNotifier.Messaging.RabbitMq;
 using CalendarNotifier.Worker.Formatting;
 using CalendarNotifier.Worker.Google;
@@ -27,9 +28,9 @@ public class Worker(ILogger<Worker> logger) : BackgroundService
                 Console.WriteLine("Consultando agenda...");
 
                 var events = await calendar.GetNext30DaysEvents();
-                var message = MessageFormatter.Format(events);
                 var notification = CalendarNotificationMapper.Map(events);
-                var body = Encoding.UTF8.GetBytes(message);
+                var json = JsonSerializer.Serialize(notification);
+                var body = Encoding.UTF8.GetBytes(json);
 
                 
                 await channel.BasicPublishAsync<BasicProperties>(

@@ -19,7 +19,8 @@ public static class CalendarNotificationMapper
                     Start = e.Start.DateTimeDateTimeOffset?.DateTime ??
                             DateTime.Parse(e.Start.Date),
                     End = e.End.DateTimeDateTimeOffset?.DateTime ??
-                          DateTime.Parse(e.End.Date)
+                          DateTime.Parse(e.End.Date),
+                    Location = e.Location,
                 }).ToList()
         };
     }

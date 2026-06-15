@@ -1,6 +1,9 @@
 using System.Text;
+using System.Text.Json;
+using CalendarNotifier.Messaging.Contracts;
 using CalendarNotifier.Messaging.RabbitMq;
 using CalendarNotifier.NotificationWorker.Configurations;
+using CalendarNotifier.NotificationWorker.Formatters;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -36,8 +39,14 @@ public class Worker(IOptions<TelegramSettings> options) : BackgroundService
                 try
                 {
                     var body = ea.Body.ToArray();
-                    var message = Encoding.UTF8.GetString(body);
-                
+                    var json = Encoding.UTF8.GetString(body);
+                    var notification = JsonSerializer.Deserialize<CalendarNotification>(json);
+                    
+                    if (notification == null)
+                        throw new Exception("Erro ao desserializar a mensagem.");
+                    
+                    var message = TelegramMessageFormatter.Format(notification);
+                    
                     Console.WriteLine(
                         $"Tentativa {retryCount + 1}");
                 

@@ -2,6 +2,7 @@ using System.Text;
 using CalendarNotifier.Messaging.RabbitMq;
 using CalendarNotifier.Worker.Formatting;
 using CalendarNotifier.Worker.Google;
+using CalendarNotifier.Worker.Mapping;
 using RabbitMQ.Client;
 
 namespace CalendarNotifier.Worker;
@@ -27,6 +28,7 @@ public class Worker(ILogger<Worker> logger) : BackgroundService
 
                 var events = await calendar.GetNext30DaysEvents();
                 var message = MessageFormatter.Format(events);
+                var notification = CalendarNotificationMapper.Map(events);
                 var body = Encoding.UTF8.GetBytes(message);
 
                 

@@ -4,6 +4,7 @@ using CalendarNotifier.Messaging.RabbitMq;
 using CalendarNotifier.Worker.Formatting;
 using CalendarNotifier.Worker.Google;
 using CalendarNotifier.Worker.Mapping;
+using CalendarNotifier.Worker.Scheduling;
 
 
 namespace CalendarNotifier.Worker;
@@ -14,22 +15,23 @@ public class Worker(ILogger<Worker> logger) : BackgroundService
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            try
-            {
-                Console.WriteLine("Consultando agenda...");
 
-                var publisher = new CalendarNotificationPublisher(
-                    new GoogleCalendarService());
-                await publisher.PublishAsync(stoppingToken);
-                
-                Console.WriteLine("Mensagem publicada na fila.");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Erro: {ex.Message}");
-            }
+            var delay = DailyScheduler.GetDelay(
+                DateTime.Now,
+                new TimeOnly(8, 0));
             
-            await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
+            Console.WriteLine(
+                $"Próxima execução em {delay.ToString()}");
+            
+            await Task.Delay(delay, stoppingToken);
+            
+            Console.WriteLine("Consultando agenda...");
+            
+            var publisher = new CalendarNotificationPublisher(
+                new GoogleCalendarService());
+            await publisher.PublishAsync(stoppingToken);
+            
+            Console.WriteLine("Mensagem publicada na fila.");
         }
         
     }

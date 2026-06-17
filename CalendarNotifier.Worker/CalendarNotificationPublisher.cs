@@ -9,7 +9,9 @@ namespace CalendarNotifier.Worker;
 
 public class CalendarNotificationPublisher (GoogleCalendarService _calendarService)
 {
-    public async Task PublishAsync(CancellationToken stoppingToken)
+    public async Task PublishAsync(
+        int daysAhead, 
+        CancellationToken stoppingToken)
     {
         await using var connection = 
             await RabbitMqConnection.CreateAsync();
@@ -19,7 +21,7 @@ public class CalendarNotificationPublisher (GoogleCalendarService _calendarServi
         
         await RabbitMqTopology.DeclareAsync(channel, stoppingToken);
         
-        var events = await _calendarService.GetNext30DaysEvents();
+        var events = await _calendarService.GetEventsAsync(daysAhead);
         var notification = CalendarNotificationMapper.Map(events);
         var json = JsonSerializer.Serialize(notification);
         var body = Encoding.UTF8.GetBytes(json);

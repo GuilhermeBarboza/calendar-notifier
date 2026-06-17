@@ -1,15 +1,14 @@
-using System.Text;
-using System.Text.Json;
-using CalendarNotifier.Messaging.RabbitMq;
-using CalendarNotifier.Worker.Formatting;
+using CalendarNotifier.Worker.Configurations;
 using CalendarNotifier.Worker.Google;
-using CalendarNotifier.Worker.Mapping;
 using CalendarNotifier.Worker.Scheduling;
+using Microsoft.Extensions.Options;
 
 
 namespace CalendarNotifier.Worker;
 
-public class Worker(ILogger<Worker> logger) : BackgroundService
+public class Worker(
+    ILogger<Worker> logger,
+    IOptions<NotificationSettings> options) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -18,7 +17,7 @@ public class Worker(ILogger<Worker> logger) : BackgroundService
 
             var delay = DailyScheduler.GetDelay(
                 DateTime.Now,
-                new TimeOnly(8, 0));
+                TimeOnly.Parse(options.Value.ExecutionTime));
             
             Console.WriteLine(
                 $"Próxima execução em {delay.ToString()}");
@@ -29,7 +28,7 @@ public class Worker(ILogger<Worker> logger) : BackgroundService
             
             var publisher = new CalendarNotificationPublisher(
                 new GoogleCalendarService());
-            await publisher.PublishAsync(stoppingToken);
+            await publisher.PublishAsync(options.Value.DaysAhead, stoppingToken);
             
             Console.WriteLine("Mensagem publicada na fila.");
         }

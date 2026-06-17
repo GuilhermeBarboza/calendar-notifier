@@ -16,10 +16,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Configurations\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\CalendarNotifier.Messaging\CalendarNotifier.Messaging.csproj" />
   </ItemGroup>
 </Project>

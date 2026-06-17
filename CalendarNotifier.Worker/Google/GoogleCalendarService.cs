@@ -6,7 +6,7 @@ namespace CalendarNotifier.Worker.Google;
 
 public class GoogleCalendarService
 {
-    public async Task<IList<Event>> GetNext30DaysEvents()
+    public async Task<IList<Event>> GetEventsAsync(int daysAhead)
     {
         var credencial = await GoogleAuth.GetCredentialAsync();
 
@@ -18,7 +18,7 @@ public class GoogleCalendarService
         
         var request = service.Events.List("primary");
         request.TimeMinDateTimeOffset = DateTime.Now;
-        request.TimeMaxDateTimeOffset = DateTime.Now.AddDays(30);
+        request.TimeMaxDateTimeOffset = DateTime.Now.AddDays(daysAhead);
         request.ShowDeleted = false;
         request.SingleEvents = true;
         request.OrderBy = EventsResource.ListRequest.OrderByEnum.StartTime;

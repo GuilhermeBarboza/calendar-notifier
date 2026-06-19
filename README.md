@@ -130,8 +130,6 @@ TF --> TG
 
 O projeto utiliza três filas:
 
-## 📬 Filas
-
 | Fila | Responsabilidade |
 |------|------------------|
 | `calendar-events` | Fila principal |

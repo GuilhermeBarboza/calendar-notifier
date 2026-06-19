@@ -69,8 +69,7 @@ A aplicação segue o padrão Producer / Consumer, onde os serviços são desaco
 
 ## 📦 Estrutura da solução
 
-```mermaid
-flowchart TD
+```text
 CalendarNotifier 
 │ 
 ├── CalendarNotifier.Worker 

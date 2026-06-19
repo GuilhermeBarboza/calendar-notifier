@@ -200,16 +200,16 @@ Na primeira execução será solicitado o login na conta Google.
 
 Próximas evoluções planejadas:
 
-Aplicação Web para configuração
-Persistência em banco de dados
-Cadastro de múltiplas contas Google
-Cadastro de múltiplos grupos Telegram
-Configuração de horários pela interface
-Autenticação
-Histórico de notificações
-Logs estruturados
-Health Checks
-Testes automatizados
+- Aplicação Web para configuração
+- Persistência em banco de dados
+- Cadastro de múltiplas contas Google
+- Cadastro de múltiplos grupos Telegram
+- Configuração de horários pela interface
+- Autenticação
+- Histórico de notificações
+- Logs estruturados
+- Health Checks
+- Testes automatizados
 
 ---
 

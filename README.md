@@ -93,25 +93,36 @@ CalendarNotifier
 
 ## 🔁 Fluxo da aplicação
 
-````mermaid
-GC[Google Calendar]
-GS[GoogleCalendarService]
-GM[CalendarNotificationMapper]
-GN[CalendarNotification (DTO)]
-JN[JSON]
-RB[RabbitMQ]
-NW[NotificationWorker]
-TF[TelegramMessageFormatter]
-TG[Telegram]
+```mermaid
+flowchart LR
+
+subgraph Producer
+    GC[Google Calendar]
+    GS[GoogleCalendarService]
+    GM[CalendarNotificationMapper]
+    DTO["CalendarNotification DTO"]
+    JS[JSON]
+end
+
+subgraph Messaging
+    MQ[RabbitMQ]
+end
+
+subgraph Consumer
+    NW[NotificationWorker]
+    TF[TelegramMessageFormatter]
+    TG[Telegram]
+end
 
 GC --> GS
 GS --> GM
-GM --> GN
-GN --> JN
-RB --> NW
+GM --> DTO
+DTO --> JS
+JS --> MQ
+MQ --> NW
 NW --> TF
-NF --> TG
-````
+TF --> TG
+```
 
 ---
 
